@@ -306,6 +306,69 @@
   }
   .footer-copy{font-size:0.78rem;color:rgba(250,247,241,0.45);}
 
+  /* ---------- chess puzzle ---------- */
+  #puzzle{
+    background:var(--ink);color:var(--paper);
+    border-top:1px solid rgba(250,247,241,0.1);padding-top:5.5rem;
+    --sq-light:#E9E3D5;--sq-dark:#7D8FB3;
+  }
+  #puzzle .eyebrow{background:rgba(250,247,241,0.1);color:var(--sand);}
+  #puzzle .heading{color:var(--paper);}
+  #puzzle .sub{color:rgba(250,247,241,0.7);}
+  .pz-grid{display:grid;grid-template-columns:minmax(0,460px) minmax(0,1fr);grid-template-areas:"board intro" "board panel";column-gap:4rem;row-gap:1.4rem;align-items:end;}
+  .pz-intro{grid-area:intro;}
+  .pz-boardwrap{grid-area:board;align-self:center;}
+  .pz-panel{grid-area:panel;align-self:start;}
+  .pz-boardwrap{
+    width:100%;max-width:460px;aspect-ratio:1;border-radius:16px;overflow:hidden;
+    border:6px solid rgba(250,247,241,0.08);box-shadow:0 24px 50px rgba(0,0,0,0.35);
+  }
+  #pzBoard{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;}
+  #pzBoard .sq{position:relative;display:flex;align-items:center;justify-content:center;}
+  #pzBoard .sq.l{background:var(--sq-light);}
+  #pzBoard .sq.d{background:var(--sq-dark);}
+  #pzBoard .sq.hl::after,#pzBoard .sq.sel::after{content:'';position:absolute;inset:0;background:rgba(255,213,79,0.55);pointer-events:none;}
+  #pzBoard .sq.sel::after{background:rgba(51,90,117,0.5);}
+  #pzBoard .sq.hint::before{content:'';position:absolute;inset:6%;border-radius:50%;box-shadow:inset 0 0 0 4px var(--sage-deep);pointer-events:none;z-index:2;}
+  #pzBoard .coord{position:absolute;font-size:10px;font-weight:700;line-height:1;opacity:0.8;pointer-events:none;}
+  #pzBoard .coord.r{top:3px;right:3px;} #pzBoard .coord.f{bottom:3px;left:3px;}
+  #pzBoard .sq.l .coord{color:var(--sq-dark);} #pzBoard .sq.d .coord{color:var(--sq-light);}
+  #puzzle .pc{width:92%;height:92%;filter:drop-shadow(0 2px 1.5px rgba(0,0,0,0.28));cursor:grab;z-index:1;}
+  #puzzle .pc.b{cursor:default;}
+  #puzzle .pc svg{display:block;width:100%;height:100%;}
+  #puzzle .pc.drag{position:fixed;z-index:200;pointer-events:none;cursor:grabbing;}
+  #pzBoard.shake{animation:pzShake .35s;}
+  @keyframes pzShake{20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
+  .pz-panel{display:flex;flex-direction:column;gap:1.4rem;min-width:0;}
+  .pz-status{
+    display:flex;align-items:center;gap:0.9rem;background:rgba(250,247,241,0.05);
+    border:1px solid rgba(250,247,241,0.14);border-radius:14px;padding:1rem 1.3rem;
+    font-weight:600;font-size:0.95rem;transition:border-color .2s ease;
+  }
+  .pz-status.good{border-color:#6FCF97;} .pz-status.good #pzMsg{color:#8FE0AE;}
+  .pz-status.bad{border-color:#F2A36B;} .pz-status.bad #pzMsg{color:#F5B98C;}
+  .pz-dot{flex:none;width:12px;height:12px;border-radius:50%;background:#1A1D23;box-shadow:0 0 0 2px rgba(250,247,241,0.35);}
+  .pz-dot.w{background:#FBFAF7;}
+  #pzMoves{display:grid;justify-content:start;grid-template-columns:auto 5.5em 5.5em;gap:0.45rem 1rem;font-size:0.95rem;font-weight:600;font-variant-numeric:tabular-nums;}
+  #pzMoves .n,#pzMoves .p{color:rgba(250,247,241,0.45);}
+  .pz-actions{display:flex;flex-wrap:wrap;gap:0.8rem;}
+  .pz-btn{
+    font:inherit;font-weight:700;font-size:0.88rem;cursor:pointer;
+    padding:0.75rem 1.4rem;border-radius:999px;transition:transform .2s ease, background .2s ease;
+  }
+  .pz-btn:hover{transform:translateY(-2px);}
+  .pz-btn:focus-visible{outline:2px solid var(--sand);outline-offset:3px;}
+  .pz-btn-primary{background:var(--paper);color:var(--ink);border:1px solid var(--paper);}
+  .pz-btn-ghost{background:transparent;color:var(--paper);border:1px solid rgba(250,247,241,0.3);}
+  .pz-btn-ghost:hover{background:rgba(250,247,241,0.08);}
+  .pz-meta{font-size:0.82rem;color:rgba(250,247,241,0.5);}
+  .pz-meta b{color:rgba(250,247,241,0.85);font-weight:700;}
+  @media (max-width:900px){
+    .pz-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "board" "panel";row-gap:2rem;}
+    .pz-boardwrap{margin:0 auto;}
+  }
+  @media (prefers-reduced-motion:reduce){ #pzBoard.shake{animation:none;} }
+
   .fade-up{opacity:0;transform:translateY(26px);transition:opacity .65s ease, transform .65s ease;}
   .fade-up.visible{opacity:1;transform:translateY(0);}
 
@@ -669,6 +732,33 @@
   </div>
 </section>
 
+<!-- ================= CHESS PUZZLE ================= -->
+<section id="puzzle" aria-label="Chess puzzle">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <linearGradient id="pcW" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f4f1e8"/><stop offset="1" stop-color="#cfc9ba"/></linearGradient>
+    <linearGradient id="pcB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5e68"/><stop offset=".45" stop-color="#2a2d34"/><stop offset="1" stop-color="#101114"/></linearGradient>
+  </defs></svg>
+  <div class="wrap">
+    <div class="pz-grid">
+      <div class="pz-intro fade-up">
+        <span class="eyebrow">Before you go</span>
+        <h2 class="heading">White to play and mate in 3</h2>
+        <p class="sub">Black's queen is eyeing f2. Find the forcing line before it lands. Drag a white piece, or tap it and then tap its destination.</p>
+      </div>
+      <div class="pz-boardwrap"><div id="pzBoard" aria-label="Chess board"></div></div>
+      <div class="pz-panel">
+        <div class="pz-status" id="pzStatus"><span class="pz-dot w" id="pzDot"></span><span id="pzMsg">Your move. White to play.</span></div>
+        <div id="pzMoves"></div>
+        <div class="pz-actions">
+          <button id="pzHint" class="pz-btn pz-btn-primary" type="button">Show hint</button>
+          <button id="pzReset" class="pz-btn pz-btn-ghost" type="button">Restart puzzle</button>
+        </div>
+        <p class="pz-meta">Difficulty <b>≈ 1600</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <p class="footer-copy">© 2026 Antoine Morin · Ottawa, Canada</p>
 </footer>
@@ -680,6 +770,147 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
   }, { threshold: 0.12 });
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+<script>
+(function(){
+const START = "r1b2rk1/pp3Npp/1qp5/8/2Q5/8/PPP2PPP/3R2K1";
+// [white move, black reply, SAN white, SAN black]
+const LINE = [
+  ["f7h6","g8h8","Nh6+","Kh8"],
+  ["c4g8","f8g8","Qg8+","Rxg8"],
+  ["h6f7",null,"Nf7#",null]
+];
+const HINTS = ["Look for a double check. Moving the knight opens the queen's diagonal.",
+               "Give up the queen on a square only the rook can take.",
+               "The king is boxed in by its own pieces."];
+
+// Piece artwork: Colin M.L. Burnett's "cburnett" set (GFDL / BSD / GPL triple-licensed),
+// with added gradient shading. W = gradient fill for white pieces, B = for black pieces.
+const W='url(#pcW)', B='url(#pcB)', HL='#e9e6de';
+const G='fill="none" fill-rule="evenodd" stroke="#14161a" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"';
+const G2=G.replace('fill="none" ','');
+const P = {
+  K:`<g ${G}><path stroke-linejoin="miter" d="M22.5 11.63V6M20 8h5"/><path fill="${W}" stroke-linecap="butt" stroke-linejoin="miter" d="M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5"/><path fill="${W}" d="M12.5 37c5.5 3.5 14.5 3.5 20 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-2.5-7.5-12-10.5-16-4-3 6 6 10.5 6 10.5v7"/><path d="M12.5 30c5.5-3 14.5-3 20 0m-20 3.5c5.5-3 14.5-3 20 0m-20 3.5c5.5-3 14.5-3 20 0"/></g>`,
+  k:`<g ${G}><path stroke-linejoin="miter" d="M22.5 11.63V6"/><path fill="${B}" stroke-linecap="butt" stroke-linejoin="miter" d="M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5"/><path fill="${B}" d="M12.5 37c5.5 3.5 14.5 3.5 20 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-2.5-7.5-12-10.5-16-4-3 6 6 10.5 6 10.5v7"/><path stroke-linejoin="miter" d="M20 8h5"/><path stroke="${HL}" d="M32 29.5s8.5-4 6.03-9.65C34.15 14 25 18 22.5 24.5v2.1-2.1C20 18 10.85 14 6.97 19.85 4.5 25.5 13 29.5 13 29.5"/><path stroke="${HL}" d="M12.5 30c5.5-3 14.5-3 20 0m-20 3.5c5.5-3 14.5-3 20 0m-20 3.5c5.5-3 14.5-3 20 0"/></g>`,
+  Q:`<g ${G2} fill="${W}"><path d="M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0m16.5-4.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0M41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0M16 8.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0M33 9a2 2 0 1 1-4 0 2 2 0 1 1 4 0"/><path stroke-linecap="butt" d="M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-14V25L7 14z"/><path stroke-linecap="butt" d="M9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z"/><path fill="none" d="M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0"/></g>`,
+  q:`<g ${G2} fill="${B}"><g stroke="none"><circle cx="6" cy="12" r="2.75"/><circle cx="14" cy="9" r="2.75"/><circle cx="22.5" cy="8" r="2.75"/><circle cx="31" cy="9" r="2.75"/><circle cx="39" cy="12" r="2.75"/></g><path stroke-linecap="butt" d="M9 26c8.5-1.5 21-1.5 27 0l2.5-12.5L31 25l-.3-14.1-5.2 13.6-3-14.5-3 14.5-5.2-13.6L14 25 6.5 13.5z"/><path stroke-linecap="butt" d="M9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z"/><path fill="none" stroke-linecap="butt" d="M11 38.5a35 35 1 0 0 23 0"/><path fill="none" stroke="${HL}" d="M11 29a35 35 1 0 1 23 0m-21.5 2.5h20m-21 3a35 35 1 0 0 22 0m-23 3a35 35 1 0 0 24 0"/></g>`,
+  R:`<g ${G2} fill="${W}"><path stroke-linecap="butt" d="M9 39h27v-3H9zm3-3v-4h21v4zm-1-22V9h4v2h5V9h5v2h5V9h4v5"/><path d="m34 14-3 3H14l-3-3"/><path stroke-linecap="butt" stroke-linejoin="miter" d="M31 17v12.5H14V17"/><path stroke-linecap="butt" d="m31 29.5 1.5 2.5h-20l1.5-2.5"/><path fill="none" stroke-linejoin="miter" d="M11 14h23"/></g>`,
+  r:`<g ${G2} fill="${B}"><path stroke-linecap="butt" d="M9 39h27v-3H9zm3.5-7 1.5-2.5h17l1.5 2.5zm-.5 4v-4h21v4z"/><path stroke-linecap="butt" stroke-linejoin="miter" d="M14 29.5v-13h17v13z"/><path stroke-linecap="butt" d="M14 16.5 11 14h23l-3 2.5zM11 14V9h4v2h5V9h5v2h5V9h4v5z"/><path fill="none" stroke="${HL}" stroke-linejoin="miter" stroke-width="1" d="M12 35.5h21m-20-4h19m-18-2h17m-17-13h17M11 14h23"/></g>`,
+  N:`<g ${G}><path fill="${W}" d="M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21"/><path fill="${W}" d="M24 18c.38 2.91-5.55 7.37-8 9-3 2-2.82 4.34-5 4-1.042-.94 1.41-3.04 0-3-1 0 .19 1.23-1 2-1 0-4.003 1-4-4 0-2 6-12 6-12s1.89-1.9 2-3.5c-.73-.994-.5-2-.5-3 1-1 3 2.5 3 2.5h2s.78-1.992 2.5-3c1 0 1 3 1 3"/><path fill="#14161a" d="M9.5 25.5a.5.5 0 1 1-1 0 .5.5 0 1 1 1 0m5.43-9.75a.5 1.5 30 1 1-.86-.5.5 1.5 30 1 1 .86.5"/></g>`,
+  n:`<g ${G}><path fill="${B}" d="M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21"/><path fill="${B}" d="M24 18c.38 2.91-5.55 7.37-8 9-3 2-2.82 4.34-5 4-1.042-.94 1.41-3.04 0-3-1 0 .19 1.23-1 2-1 0-4.003 1-4-4 0-2 6-12 6-12s1.89-1.9 2-3.5c-.73-.994-.5-2-.5-3 1-1 3 2.5 3 2.5h2s.78-1.992 2.5-3c1 0 1 3 1 3"/><path fill="${HL}" stroke="${HL}" d="M9.5 25.5a.5.5 0 1 1-1 0 .5.5 0 1 1 1 0m5.43-9.75a.5 1.5 30 1 1-.86-.5.5 1.5 30 1 1 .86.5"/><path fill="${HL}" stroke="none" d="m24.55 10.4-.45 1.45.5.15c3.15 1 5.65 2.49 7.9 6.75S35.75 29.06 35.25 39l-.05.5h2.25l.05-.5c.5-10.06-.88-16.85-3.25-21.34s-5.79-6.64-9.19-7.16z"/></g>`,
+  B:`<g ${G}><g fill="${W}" stroke-linecap="butt"><path d="M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2z"/><path d="M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z"/><path d="M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z"/></g><path stroke-linejoin="miter" d="M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5"/></g>`,
+  b:`<g ${G}><g fill="${B}" stroke-linecap="butt"><path d="M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2z"/><path d="M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z"/><path d="M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z"/></g><path stroke="${HL}" stroke-linejoin="miter" d="M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5"/></g>`,
+  P:`<path fill="${W}" stroke="#14161a" stroke-linecap="round" stroke-width="1.5" d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03C15.41 27.09 11 31.58 11 39.5h23c0-7.92-4.41-12.41-7.41-13.47C28.06 24.84 29 23.03 29 21c0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z"/>`,
+  p:`<path fill="${B}" stroke="#14161a" stroke-linecap="round" stroke-width="1.5" d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03C15.41 27.09 11 31.58 11 39.5h23c0-7.92-4.41-12.41-7.41-13.47C28.06 24.84 29 23.03 29 21c0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z"/>`
+};
+function svg(t){ return `<svg viewBox="0 0 45 45" aria-hidden="true">${P[t]}</svg>`; }
+
+const boardEl = document.getElementById('pzBoard'), msgEl = document.getElementById('pzMsg'),
+      statusEl = document.getElementById('pzStatus'), dotEl = document.getElementById('pzDot'),
+      movesEl = document.getElementById('pzMoves');
+let pos, step, locked, selected, lastMove, hintSq, hintLevel;
+
+function parse(fen){
+  const m = {}; fen.split('/').forEach((row,ri)=>{ let f=0;
+    for(const c of row){ if(/\d/.test(c)) f+= +c; else { m['abcdefgh'[f]+(8-ri)] = c; f++; } } });
+  return m;
+}
+function squares(){ const s=[]; for(let r=8;r>=1;r--) for(let f=0;f<8;f++) s.push('abcdefgh'[f]+r); return s; }
+
+function render(){
+  boardEl.innerHTML='';
+  squares().forEach((sq,i)=>{
+    const f = sq.charCodeAt(0)-97, r = +sq[1];
+    const d = document.createElement('div');
+    d.className = 'sq ' + ((f+r)%2 ? 'd' : 'l');
+    d.dataset.sq = sq;
+    if(lastMove && lastMove.includes(sq)) d.classList.add('hl');
+    if(selected===sq) d.classList.add('sel');
+    if(hintSq===sq) d.classList.add('hint');
+    if(f===7) d.insertAdjacentHTML('beforeend',`<span class="coord r" style="left:auto;right:3px">${r}</span>`);
+    if(r===1) d.insertAdjacentHTML('beforeend',`<span class="coord f" style="right:auto;left:3px">${sq[0]}</span>`);
+    const p = pos[sq];
+    if(p){ const w=document.createElement('div'); w.className='pc '+(p===p.toUpperCase()?'w':'b'); w.innerHTML=svg(p); w.dataset.sq=sq; d.appendChild(w); }
+    boardEl.appendChild(d);
+  });
+  renderMoves();
+}
+function renderMoves(){
+  let h='';
+  LINE.forEach((l,i)=>{
+    const wDone = i<step || (i===step && false);
+    const w = i<step ? l[2] : '…', b = i<step && l[3] ? l[3] : (i<step ? '' : '…');
+    h += `<span class="n">${i+1}.</span><span class="${i<step?'':'p'}">${w}</span><span class="${i<step?'':'p'}">${b}</span>`;
+  });
+  movesEl.innerHTML=h;
+}
+function setStatus(text, kind, turn){
+  msgEl.textContent=text; statusEl.className='pz-status'+(kind?' '+kind:'');
+  dotEl.className='pz-dot'+(turn==='w'?' w':'');
+}
+function apply(uci){ const a=uci.slice(0,2), b=uci.slice(2,4); pos[b]=pos[a]; delete pos[a]; lastMove=[a,b]; }
+
+function tryMove(from,to){
+  selected=null;
+  if(from===to){ render(); return; }
+  const want = LINE[step][0];
+  if(from+to === want){
+    apply(want); hintSq=null; hintLevel=0; document.getElementById('pzHint').textContent='Show hint';
+    const reply = LINE[step][1]; step++;
+    render();
+    if(!reply){ locked=true; setStatus('Checkmate. Nicely done! Thanks for visiting.','good','w'); return; }
+    locked=true; setStatus('Correct! Black is replying…','good','b');
+    setTimeout(()=>{ apply(reply); locked=false; render(); setStatus('Black played '+LINE[step-1][3]+'. Keep going.','', 'w'); }, 600);
+  } else {
+    render();
+    boardEl.classList.remove('shake'); void boardEl.offsetWidth; boardEl.classList.add('shake');
+    setStatus('Not the move. The piece goes back. Try again.','bad','w');
+  }
+}
+
+function reset(){ pos=parse(START); step=0; locked=false; selected=null; lastMove=null; hintSq=null; hintLevel=0;
+  render(); setStatus('Your move. White to play.','', 'w'); document.getElementById('pzHint').textContent='Show hint'; }
+
+// Pointer: drag or tap-tap
+let drag=null;
+boardEl.addEventListener('pointerdown',e=>{
+  if(locked) return;
+  const sqEl = e.target.closest('.sq'); if(!sqEl) return;
+  const sq = sqEl.dataset.sq, p = pos[sq];
+  if(selected && (!p || p!==p.toUpperCase())){ tryMove(selected,sq); return; }
+  if(!p || p!==p.toUpperCase()) { if(p) { setStatus('You are playing White.','', 'w'); } return; }
+  e.preventDefault();
+  const pc = sqEl.querySelector('.pc'); const rect = pc.getBoundingClientRect();
+  drag={from:sq, el:pc, w:rect.width, moved:false, sx:e.clientX, sy:e.clientY};
+  boardEl.setPointerCapture(e.pointerId);
+});
+boardEl.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  if(!drag.moved && Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)<5) return;
+  if(!drag.moved){ drag.moved=true; drag.el.classList.add('drag'); drag.el.style.width=drag.el.style.height=drag.w+'px'; }
+  drag.el.style.left=(e.clientX-drag.w/2)+'px'; drag.el.style.top=(e.clientY-drag.w/2)+'px';
+});
+boardEl.addEventListener('pointerup',e=>{
+  if(!drag) return; const d=drag; drag=null;
+  if(!d.moved){ // tap
+    if(selected===d.from){ selected=null; render(); return; }
+    if(selected){ tryMove(selected,d.from); return; }
+    selected=d.from; render(); return;
+  }
+  const t=document.elementFromPoint(e.clientX,e.clientY);
+  const sqEl=t && t.closest && t.closest('.sq');
+  tryMove(d.from, sqEl ? sqEl.dataset.sq : d.from);
+});
+boardEl.addEventListener('pointercancel',()=>{ drag=null; render(); });
+
+document.getElementById('pzReset').onclick=reset;
+document.getElementById('pzHint').onclick=function(){
+  if(step>=LINE.length) return;
+  if(hintLevel===0){ setStatus(HINTS[step],'', 'w'); hintLevel=1; this.textContent='Show piece'; }
+  else { hintSq=LINE[step][0].slice(0,2); render(); setStatus('Move the highlighted piece.','', 'w'); }
+};
+reset();
+})();
 </script>
 </body>
 </html>
