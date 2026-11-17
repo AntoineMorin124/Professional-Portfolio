@@ -367,7 +367,22 @@
     .pz-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "board" "panel";row-gap:2rem;}
     .pz-boardwrap{margin:0 auto;}
   }
-  @media (prefers-reduced-motion:reduce){ #pzBoard.shake{animation:none;} }
+  .pz-boardwrap.win{animation:pzWin 1.6s ease-out 2;}
+  @keyframes pzWin{
+    0%{box-shadow:0 24px 50px rgba(0,0,0,0.35),0 0 0 0 rgba(111,207,151,0);border-color:rgba(250,247,241,0.08);}
+    25%{box-shadow:0 24px 50px rgba(0,0,0,0.35),0 0 0 14px rgba(111,207,151,0.55);border-color:#6FCF97;}
+    100%{box-shadow:0 24px 50px rgba(0,0,0,0.35),0 0 0 34px rgba(111,207,151,0);border-color:rgba(250,247,241,0.08);}
+  }
+  .pz-boardwrap.won{border-color:#6FCF97;}
+  #pzBoard.win::after{content:'';position:absolute;inset:0;background:#6FCF97;pointer-events:none;animation:pzFlash 1.2s ease-out forwards;}
+  #pzBoard{position:relative;}
+  @keyframes pzFlash{0%{opacity:0.55;}100%{opacity:0;}}
+  #pzBoard .sq.mate::after{content:'';position:absolute;inset:0;background:radial-gradient(circle,rgba(229,72,77,0.85) 0%,rgba(229,72,77,0.45) 45%,rgba(229,72,77,0) 75%);pointer-events:none;}
+  .pz-status.win{border-color:#6FCF97;background:rgba(111,207,151,0.12);animation:pzPop .5s cubic-bezier(.2,1.6,.4,1);}
+  .pz-status.win #pzMsg{color:#8FE0AE;font-size:1.05rem;}
+  @keyframes pzPop{0%{transform:scale(0.94);}100%{transform:scale(1);}}
+  #pzConfetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:300;}
+  @media (prefers-reduced-motion:reduce){ #pzBoard.shake,.pz-boardwrap.win,.pz-status.win,#pzBoard.win::after{animation:none;} }
 
   .fade-up{opacity:0;transform:translateY(26px);transition:opacity .65s ease, transform .65s ease;}
   .fade-up.visible{opacity:1;transform:translateY(0);}
@@ -435,7 +450,7 @@
         <div class="fact-icon">🎓</div>
         <div>
           <div class="fact-title">Telfer School of Management</div>
-          <div class="fact-sub">B.Com — Finance &amp; Business Technology, 2027</div>
+          <div class="fact-sub">B.Com — Finance &amp; Business Technology, 2026</div>
         </div>
       </div>
       <div class="fact">
@@ -825,6 +840,7 @@ function render(){
     d.className = 'sq ' + ((f+r)%2 ? 'd' : 'l');
     d.dataset.sq = sq;
     if(lastMove && lastMove.includes(sq)) d.classList.add('hl');
+    if(step>=LINE.length && pos[sq]==='k') d.classList.add('mate');
     if(selected===sq) d.classList.add('sel');
     if(hintSq===sq) d.classList.add('hint');
     if(f===7) d.insertAdjacentHTML('beforeend',`<span class="coord r" style="left:auto;right:3px">${r}</span>`);
@@ -858,7 +874,7 @@ function tryMove(from,to){
     apply(want); hintSq=null; hintLevel=0; document.getElementById('pzHint').textContent='Show hint';
     const reply = LINE[step][1]; step++;
     render();
-    if(!reply){ locked=true; setStatus('Checkmate. Nicely done! Thanks for visiting.','good','w'); return; }
+    if(!reply){ locked=true; setStatus('Checkmate! You solved it. Thanks for visiting.','win','w'); celebrate(); return; }
     locked=true; setStatus('Correct! Black is replying…','good','b');
     setTimeout(()=>{ apply(reply); locked=false; render(); setStatus('Black played '+LINE[step-1][3]+'. Keep going.','', 'w'); }, 600);
   } else {
@@ -868,7 +884,47 @@ function tryMove(from,to){
   }
 }
 
-function reset(){ pos=parse(START); step=0; locked=false; selected=null; lastMove=null; hintSq=null; hintLevel=0;
+const wrapEl = boardEl.parentElement;
+let confettiRaf = null;
+function celebrate(){
+  wrapEl.classList.remove('win','won'); boardEl.classList.remove('win'); void wrapEl.offsetWidth;
+  wrapEl.classList.add('win','won'); boardEl.classList.add('win');
+  setTimeout(()=>{ wrapEl.classList.remove('win'); boardEl.classList.remove('win'); }, 3300);
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  stopConfetti();
+  const c = document.createElement('canvas'); c.id = 'pzConfetti'; document.body.appendChild(c);
+  const ctx = c.getContext('2d'), dpr = Math.min(window.devicePixelRatio||1, 2);
+  const W = window.innerWidth, H = window.innerHeight;
+  c.width = W*dpr; c.height = H*dpr; ctx.scale(dpr,dpr);
+  const colors = ['#6FCF97','#8FE0AE','#E9E3D5','#7D8FB3','#4C7A9C','#FBFAF7','#F2C94C'];
+  const N = Math.round(Math.min(220, W/5));
+  const parts = Array.from({length:N}, ()=>({
+    x: Math.random()*W, y: -20 - Math.random()*H*0.6,
+    w: 6+Math.random()*6, h: 9+Math.random()*8,
+    vy: 2.2+Math.random()*3.2, vx: -1+Math.random()*2,
+    rot: Math.random()*Math.PI, vr: -0.15+Math.random()*0.3,
+    sway: Math.random()*Math.PI*2, color: colors[(Math.random()*colors.length)|0]
+  }));
+  const start = performance.now();
+  (function frame(t){
+    const age = t - start; ctx.clearRect(0,0,W,H);
+    let alive = 0;
+    ctx.globalAlpha = age > 4200 ? Math.max(0, 1-(age-4200)/800) : 1;
+    for(const p of parts){
+      p.sway += 0.05; p.x += p.vx + Math.sin(p.sway)*0.8; p.y += p.vy; p.rot += p.vr;
+      if(p.y < H+20) alive++;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2*Math.abs(Math.cos(p.sway)), p.w, p.h*Math.abs(Math.cos(p.sway))+1);
+      ctx.restore();
+    }
+    if(alive && age < 5000) confettiRaf = requestAnimationFrame(frame); else stopConfetti();
+  })(start);
+}
+function stopConfetti(){
+  if(confettiRaf) cancelAnimationFrame(confettiRaf); confettiRaf = null;
+  const old = document.getElementById('pzConfetti'); if(old) old.remove();
+}
+function reset(){ stopConfetti(); wrapEl.classList.remove('win','won'); boardEl.classList.remove('win'); pos=parse(START); step=0; locked=false; selected=null; lastMove=null; hintSq=null; hintLevel=0;
   render(); setStatus('Your move. White to play.','', 'w'); document.getElementById('pzHint').textContent='Show hint'; }
 
 // Pointer: drag or tap-tap
